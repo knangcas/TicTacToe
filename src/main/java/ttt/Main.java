@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
@@ -12,13 +15,20 @@ public class Main {
     static boolean player1 = true;
     static boolean player2 = false;
 
-    boolean host;
-    boolean local;
+    static boolean hosting;
+    static boolean local;
+
+    static int hostPort;
+
+    static Socket sock;
+    static ServerSocket servSock;
+
+
 
 
     public static void main(String[] args) {
 
-
+        GridBagConstraints gbc = new GridBagConstraints();
         JDialog welcome = new JDialog();
         welcome.setSize(300,300);
         JButton host = new JButton("Host a Game");
@@ -29,11 +39,87 @@ public class Main {
 
 
         JDialog hostWindow = new JDialog();
-        JTextField hostPort = new JTextField();
-        JLabel hostPostLabel = new JLabel();
+        JTextField hostPortField = new JTextField();
+        JLabel hostPortLabel = new JLabel("Port: ");
+        JLabel hostWindowMsg = new JLabel();
+        JButton hostWindowSubmit = new JButton("Submit");
 
 
-        GridBagConstraints gbc = new GridBagConstraints();
+        hostWindowMsg.setFont(new Font("Arial", Font.BOLD, 16));
+        hostWindowMsg.setText("Enter host port");
+        hostWindow.setLayout(new GridBagLayout());
+        hostWindow.setSize(300,300);
+        gbc.gridx=0;
+        gbc.gridy=0;
+        gbc.gridwidth = 2;
+        hostWindow.add(hostWindowMsg, gbc);
+
+
+        gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+
+        hostWindow.add(hostPortLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.ipadx = 80;
+        hostWindow.add(hostPortField, gbc);
+
+        JLabel portMsg = new JLabel("(Port range 1024-65535)");
+        portMsg.setFont(new Font("Arial", Font.PLAIN, 10));
+
+
+
+
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+
+        hostWindow.add(portMsg, gbc);
+
+
+
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        hostWindow.add(hostWindowSubmit, gbc);
+
+        hostWindowSubmit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String hpf = hostPortField.getText();
+                try {
+                    hostPort = Integer.parseInt(hpf);
+                    if (hostPort <1024 || hostPort > 65535) {
+                        throw new NumberFormatException("not in range");
+                    } else {
+                        hosting = true;
+                        hostWindow.setVisible(false);
+                    }
+                } catch (NumberFormatException nfe) {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid port number.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        gbc.gridwidth = 1;
+
+
+
+
+
+        host.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hostWindow.setVisible(true);
+            }
+        });
+
+
+
         gbc.gridy=0;
         gbc.gridx=0;
         welcomeText.setFont(new Font("Arial", Font.BOLD, 20));
@@ -55,8 +141,6 @@ public class Main {
         welcome.add(local, gbc);
 
         welcome.setVisible(true);
-
-
 
 
         JFrame window = new JFrame();
@@ -366,6 +450,27 @@ public class Main {
         gbc.ipady=40;
         window.add(playerTurn, gbc);
 
+
+
+        if (hosting) {
+            try {
+                servSock = new ServerSocket(hostPort);
+                sock = servSock.accept();
+            } catch (IOException e) {
+                //TODO
+            }
+
+            while(true) {
+                if (player1) {
+                    playerTurn.setText("Player1's turn");
+                } else {
+                    playerTurn.setText("Player2's turn");
+                }
+
+
+            }
+
+        }
 
 
         while(true) {
