@@ -5,6 +5,9 @@ public class GameLogic {
     static boolean lt, lm, lb, ct, cm, cb, rt, rm, rb;
     static boolean lt2, lm2, lb2, ct2, cm2, cb2, rt2, rm2, rb2;
 
+    static boolean p1moves[] = new boolean[9];
+    static boolean p2moves[] = new boolean[9];
+
 
 
     void newGame() {
@@ -17,6 +20,9 @@ public class GameLogic {
         rt = false;
         rm = false;
         rb = false;
+
+
+
         lt2 = false;
         lm2 = false;
         lb2 = false;
@@ -26,6 +32,11 @@ public class GameLogic {
         rt2 = false;
         rm2 = false;
         rb2 = false;
+
+        for (int i = 0; i < 9; i++) {
+            p1moves[i] = false;
+            p2moves[i] = false;
+        }
 
 
     }
@@ -80,30 +91,39 @@ public class GameLogic {
         switch (num) {
             case 1:
                 lt = true;
+                p1moves[0] = true;
                 break;
             case 2:
                 ct = true;
+                p1moves[1] = true;
                 break;
             case 3:
                 rt = true;
+                p1moves[2] = true;
                 break;
             case 4:
                 lm = true;
+                p1moves[3] = true;
                 break;
             case 5:
                 cm = true;
+                p1moves[4] = true;
                 break;
             case 6:
                 rm = true;
+                p1moves[5] = true;
                 break;
             case 7:
                 lb = true;
+                p1moves[6] = true;
                 break;
             case 8:
                 cb = true;
+                p1moves[7] = true;
                 break;
             case 9:
                 rb = true;
+                p1moves[8] = true;
                 break;
             default:
                 throw new IndexOutOfBoundsException("not a valid move");
@@ -114,30 +134,39 @@ public class GameLogic {
         switch (num) {
             case 1:
                 lt2 = true;
+                p2moves[0] = true;
                 break;
             case 2:
                 ct2 = true;
+                p2moves[1] = true;
                 break;
             case 3:
                 rt2 = true;
+                p2moves[2] = true;
                 break;
             case 4:
                 lm2 = true;
+                p2moves[3] = true;
                 break;
             case 5:
                 cm2 = true;
+                p2moves[4] = true;
                 break;
             case 6:
                 rm2 = true;
+                p2moves[5] = true;
                 break;
             case 7:
                 lb2 = true;
+                p2moves[6] = true;
                 break;
             case 8:
                 cb2 = true;
+                p2moves[7] = true;
                 break;
             case 9:
                 rb2 = true;
+                p2moves[8] = true;
                 break;
             default:
                 throw new IndexOutOfBoundsException("not a valid move");
