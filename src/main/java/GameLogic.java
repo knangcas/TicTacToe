@@ -1,5 +1,3 @@
-package ttt;
-
 public class GameLogic {
 
     static boolean lt, lm, lb, ct, cm, cb, rt, rm, rb;

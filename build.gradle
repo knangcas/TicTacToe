@@ -1,9 +1,13 @@
 plugins {
     id 'java'
+
 }
 
-group = 'ttt'
-version = '1.0-SNAPSHOT'
+apply plugin: 'application'
+
+
+
+mainClassName = 'ttt.Main'
 
 repositories {
     mavenCentral()
@@ -11,9 +15,21 @@ repositories {
 
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
+    implementation 'org.json:json:20240303'
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
     useJUnitPlatform()
 }
+
+task runMain(type: JavaExec) {
+    group 'Client'
+    description 'test'
+
+    classpath = sourceSets.main.runtimeClasspath
+
+    mainClass = 'Main'
+    standardInput = System.in
+}
+

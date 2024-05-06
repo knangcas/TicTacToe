@@ -1,12 +1,17 @@
-package ttt;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Stack;
+
+
 
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
@@ -16,18 +21,32 @@ public class Main {
     static boolean player2 = false;
 
     static boolean hosting;
-    static boolean local;
+    static boolean localGame;
+
+    static boolean p2;
 
     static int hostPort;
+    static int joinPort;
+
+    static boolean gate;
+
+    static String address;
 
     static Socket sock;
     static ServerSocket servSock;
+
+    static JFrame window;
+
+    static JLabel playerTurn;
+
+    static Stack<Integer> p1moves = new Stack<>();
+    static Stack<Integer> p2moves = new Stack<>();
 
 
 
 
     public static void main(String[] args) {
-
+        gate = true;
         GridBagConstraints gbc = new GridBagConstraints();
         JDialog welcome = new JDialog();
         welcome.setSize(300,300);
@@ -44,6 +63,27 @@ public class Main {
         JLabel hostWindowMsg = new JLabel();
         JButton hostWindowSubmit = new JButton("Submit");
 
+        JDialog joinWindow = new JDialog();
+        JTextField joinPortField = new JTextField();
+        JLabel joinPortLabel = new JLabel("Port: ");
+        JLabel joinWindowMsg = new JLabel();
+        JButton joinWindowSubmit = new JButton("Submit");
+        JTextField joinAddressField = new JTextField();
+        JLabel joinAddressLabel = new JLabel("Address: ");
+        joinPortLabel.setHorizontalAlignment(JLabel.RIGHT);
+        joinAddressLabel.setHorizontalTextPosition(JLabel.LEFT);
+
+        joinWindowMsg.setFont(new Font("Aria", Font.BOLD, 16));
+        joinWindowMsg.setText("Enter host port");
+        joinWindow.setLayout(new GridBagLayout());
+        joinWindow.setSize(300, 300);
+
+
+        JLabel joinMsg = new JLabel("(Port and Address of game.)");
+        joinMsg.setFont(new Font("Arial", Font.PLAIN, 10));
+
+
+
 
         hostWindowMsg.setFont(new Font("Arial", Font.BOLD, 16));
         hostWindowMsg.setText("Enter host port");
@@ -53,6 +93,7 @@ public class Main {
         gbc.gridy=0;
         gbc.gridwidth = 2;
         hostWindow.add(hostWindowMsg, gbc);
+        joinWindow.add(joinWindowMsg, gbc);
 
 
         gbc.gridwidth = 1;
@@ -60,11 +101,13 @@ public class Main {
         gbc.gridy = 1;
 
         hostWindow.add(hostPortLabel, gbc);
+        joinWindow.add(joinPortLabel, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.ipadx = 80;
         hostWindow.add(hostPortField, gbc);
+        joinWindow.add(joinPortField, gbc);
 
         JLabel portMsg = new JLabel("(Port range 1024-65535)");
         portMsg.setFont(new Font("Arial", Font.PLAIN, 10));
@@ -78,6 +121,20 @@ public class Main {
         gbc.gridwidth = 2;
 
         hostWindow.add(portMsg, gbc);
+        gbc.gridwidth = 1;
+        joinWindow.add(joinAddressLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.ipadx = 80;
+        joinWindow.add(joinAddressField, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridwidth = 2;
+        gbc.gridy=4;
+        joinWindow.add(joinMsg, gbc);
+
+
 
 
 
@@ -86,24 +143,17 @@ public class Main {
         gbc.gridy = 4;
         gbc.gridwidth = 2;
         hostWindow.add(hostWindowSubmit, gbc);
+        gbc.gridy = 5;
+        joinWindow.add(joinWindowSubmit, gbc);
 
-        hostWindowSubmit.addActionListener(new ActionListener() {
+        join.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String hpf = hostPortField.getText();
-                try {
-                    hostPort = Integer.parseInt(hpf);
-                    if (hostPort <1024 || hostPort > 65535) {
-                        throw new NumberFormatException("not in range");
-                    } else {
-                        hosting = true;
-                        hostWindow.setVisible(false);
-                    }
-                } catch (NumberFormatException nfe) {
-                    JOptionPane.showMessageDialog(null, "Please enter a valid port number.", "ERROR", JOptionPane.ERROR_MESSAGE);
-                }
+                joinWindow.setVisible(true);
             }
         });
+
+
 
         gbc.gridwidth = 1;
 
@@ -143,13 +193,15 @@ public class Main {
         welcome.setVisible(true);
 
 
-        JFrame window = new JFrame();
+        window = new JFrame();
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         GridBagLayout gbl = new GridBagLayout();
         window.setLayout(gbl);
         window.setTitle("TicTacToe");
+
+
+        window.setSize(1000,800);
         window.setVisible(true);
-        window.setSize(1000,1000);
 
         JButton lt = new JButton();
         JButton ct = new JButton();
@@ -202,12 +254,14 @@ public class Main {
                     player2=true;
                     lt.setEnabled(false);
                     GameLogic.playerOneMove(1);
+                    p1moves.add(1);
                 } else if(player2) {
                     ltText.setText("O");
                     player2=false;
                     player1=true;
                     lt.setEnabled(false);
                     GameLogic.playerTwoMove(1);
+                    p2moves.add(1);
                 }
             }
         });
@@ -233,12 +287,14 @@ public class Main {
                     player2=true;
                     ct.setEnabled(false);
                     GameLogic.playerOneMove(2);
+                    p1moves.add(2);
                 } else if(player2) {
                     ctText.setText("O");
                     player2=false;
                     player1=true;
                     ct.setEnabled(false);
                     GameLogic.playerTwoMove(2);
+                    p2moves.add(2);
                 }
             }
         });
@@ -261,12 +317,14 @@ public class Main {
                     player2=true;
                     rt.setEnabled(false);
                     GameLogic.playerOneMove(3);
+                    p1moves.add(3);
                 } else if(player2) {
                     rtText.setText("O");
                     player2=false;
                     player1=true;
                     rt.setEnabled(false);
                     GameLogic.playerTwoMove(3);
+                    p2moves.add(3);
                 }
             }
         });
@@ -289,12 +347,14 @@ public class Main {
                     player2=true;
                     lm.setEnabled(false);
                     GameLogic.playerOneMove(4);
+                    p1moves.add(4);
                 } else if(player2) {
                     lmText.setText("O");
                     player2=false;
                     player1=true;
                     lm.setEnabled(false);
                     GameLogic.playerTwoMove(4);
+                    p2moves.add(4);
                 }
             }
         });
@@ -317,12 +377,14 @@ public class Main {
                     player2=true;
                     cm.setEnabled(false);
                     GameLogic.playerOneMove(5);
+                    p1moves.add(5);
                 } else if(player2) {
                     cmText.setText("O");
                     player2=false;
                     player1=true;
                     cm.setEnabled(false);
                     GameLogic.playerTwoMove(5);
+                    p2moves.add(5);
                 }
             }
         });
@@ -345,12 +407,14 @@ public class Main {
                     player2=true;
                     rm.setEnabled(false);
                     GameLogic.playerOneMove(6);
+                    p1moves.add(6);
                 } else if(player2) {
                     rmText.setText("O");
                     player2=false;
                     player1=true;
                     rm.setEnabled(false);
                     GameLogic.playerTwoMove(6);
+                    p2moves.add(6);
                 }
             }
         });
@@ -373,12 +437,14 @@ public class Main {
                     player2=true;
                     lb.setEnabled(false);
                     GameLogic.playerOneMove(7);
+                    p1moves.add(7);
                 } else if(player2) {
                     ctText.setText("O");
                     player2=false;
                     player1=true;
                     lb.setEnabled(false);
                     GameLogic.playerTwoMove(7);
+                    p2moves.add(7);
                 }
             }
         });
@@ -401,12 +467,14 @@ public class Main {
                     player2=true;
                     cb.setEnabled(false);
                     GameLogic.playerOneMove(8);
+                    p1moves.add(8);
                 } else if(player2) {
                     cbText.setText("O");
                     player2=false;
                     player1=true;
                     cb.setEnabled(false);
                     GameLogic.playerTwoMove(8);
+                    p2moves.add(8);
                 }
             }
         });
@@ -430,19 +498,21 @@ public class Main {
                     player2=true;
                     rb.setEnabled(false);
                     GameLogic.playerOneMove(9);
+                    p1moves.add(9);
                 } else if(player2) {
                     rbText.setText("O");
                     player2=false;
                     player1=true;
                     rb.setEnabled(false);
                     GameLogic.playerTwoMove(9);
+                    p2moves.add(9);
                 }
             }
         });
 
 
 
-        JLabel playerTurn = new JLabel("Placeholder");
+        playerTurn = new JLabel("Placeholder");
 
         gbc.gridwidth = 3;
         gbc.gridy = 4;
@@ -452,50 +522,203 @@ public class Main {
 
 
 
+
+
+
+
+        hostWindowSubmit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String hpf = hostPortField.getText();
+                try {
+                    hostPort = Integer.parseInt(hpf);
+                    if (hostPort <1024 || hostPort > 65535) {
+                        throw new NumberFormatException("not in range");
+                    } else {
+                        hosting = true;
+                        localGame = false;
+                        gate = false;
+                        hostWindow.setVisible(false);
+                        welcome.setVisible(false);
+
+                        runGame("", hostPort);
+                    }
+                } catch (NumberFormatException nfe) {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid port number.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        joinWindowSubmit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+
+                boolean show = true;
+                if (joinPortField.getText().isEmpty() || joinAddressField.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please enter required fields", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    show = false;
+                }
+
+                String jpf = joinPortField.getText();
+                address = joinAddressField.getText();
+
+
+
+                try {
+                    joinPort = Integer.parseInt(jpf);
+                    if (joinPort<1024 || joinPort >65535) {
+                        throw new NumberFormatException("not in range");
+                    } else {
+                        hosting = false;
+                        p2 = true;
+                        gate = false;
+                        joinWindow.setVisible(false);
+                        welcome.setVisible(false);
+                        runGame(address, joinPort);
+                    }
+                } catch (NumberFormatException nfe) {
+                    if (show) {
+                        JOptionPane.showMessageDialog(null, "Please enter a valid port number.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
+
+            }
+        });
+
+
+
+    }
+
+    private static void runGame(String host, int port){
+
+        window.setVisible(true);
         if (hosting) {
+            System.out.println("Hosting a game on port: " + hostPort);
+            DataOutputStream dos = null;
+            DataInputStream dis = null;
             try {
                 servSock = new ServerSocket(hostPort);
+                System.out.println("Waiting for connection...");
                 sock = servSock.accept();
+                System.out.println("Connected!");
+                dos = new DataOutputStream(sock.getOutputStream());
+                dis = new DataInputStream(sock.getInputStream());
+            } catch (IOException e) {
+                System.out.println("exception");
+            }
+
+
+
+            while(true) {
+                if (player1) {
+                    if (GameLogic.checkVictoryP2()) {
+                        //TODO
+                        JOptionPane.showMessageDialog(null, "Player2 wins", "Notice", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    playerTurn.setText("Player1's turn");
+                    JSONObject send = new JSONObject();
+                    send.put("p1move", p1moves.peek());
+                    try {
+                        dos.writeUTF(send.toString());
+                    } catch (IOException e) {
+                        //TODO
+                    }
+                } else if (player2) {
+                    playerTurn.setText("Player2's turn");
+                    if (GameLogic.checkVictoryP1()) {
+                        //TODO
+                        JOptionPane.showMessageDialog(null, "Player1 wins", "Notice", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    String player2move = null;
+                    try {
+                        player2move = dis.readUTF();
+                    } catch (IOException e) {
+                        //TODO
+                    }
+                    try {
+                        JSONObject fromP2 = new JSONObject(player2move);
+                        p2moves.push(fromP2.getInt("p2move"));
+                    } catch (Exception e) {
+                        //TODO
+                    }
+                    GameLogic.playerTwoMove(p2moves.peek());
+                }
+
+            }
+
+        }
+
+        if (!hosting && p2) {
+            DataOutputStream dos = null;
+            DataInputStream dis = null;
+            try {
+                System.out.println("Connecting to..." + address + ":" + joinPort);
+                sock = new Socket(address, joinPort);
+                dos = new DataOutputStream(sock.getOutputStream());
+                dis = new DataInputStream(sock.getInputStream());
             } catch (IOException e) {
                 //TODO
             }
 
             while(true) {
-                if (player1) {
-                    playerTurn.setText("Player1's turn");
-                } else {
+                if (player2) {
+                    if (GameLogic.checkVictoryP1()) {
+                        //TODO
+                        JOptionPane.showMessageDialog(null, "Player1 wins", "Notice", JOptionPane.INFORMATION_MESSAGE);
+                    }
                     playerTurn.setText("Player2's turn");
+                    JSONObject send = new JSONObject();
+                    send.put("p1move", p1moves.peek());
+                    try {
+                        dos.writeUTF(send.toString());
+                    } catch (IOException e) {
+                        //TODO
+                    }
+                } else if (player1) {
+                    playerTurn.setText("Player1's turn");
+                    if (GameLogic.checkVictoryP2()) {
+                        //TODO
+                        JOptionPane.showMessageDialog(null, "Player2 wins", "Notice", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    String player2move = null;
+                    try {
+                        player2move = dis.readUTF();
+                    } catch (IOException e) {
+                        //TODO
+                    }
+                    try {
+                        JSONObject fromP2 = new JSONObject(player2move);
+                        p2moves.push(fromP2.getInt("p2move"));
+                    } catch (Exception e) {
+                        //TODO
+                    }
+                    GameLogic.playerTwoMove(p2moves.peek());
                 }
-
-
             }
-
         }
 
+        if (!hosting && !localGame) {
+            System.out.println("Playing local game");
+            while(true) {
+                if (player1) {
+                    if (GameLogic.checkVictoryP2()) {
 
-        while(true) {
-            if (player1) {
-                if (GameLogic.checkVictoryP2()) {
-
+                    }
+                    playerTurn.setText("Player1's turn");
+                    //System.out.println("player1move");
                 }
-                playerTurn.setText("Player1's turn");
-                //System.out.println("player1move");
-            }
-            if (player2) {
-                if (GameLogic.checkVictoryP1()) {
-                    JOptionPane.showMessageDialog(null, "Player1 wins", "Notice", JOptionPane.INFORMATION_MESSAGE);
+                if (player2) {
+                    if (GameLogic.checkVictoryP1()) {
+                        JOptionPane.showMessageDialog(null, "Player1 wins", "Notice", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    playerTurn.setText("Player2's turn");
+                    //System.out.println("player2move");
                 }
-                playerTurn.setText("Player2's turn");
-                //System.out.println("player2move");
-            }
 
+            }
         }
-
-
-
-
-
-
 
     }
 }
