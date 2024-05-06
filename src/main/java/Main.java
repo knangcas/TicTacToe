@@ -39,6 +39,26 @@ public class Main {
 
     static JLabel playerTurn;
 
+    static JButton lt;
+    static JButton ct;
+    static JButton rt;
+    static JButton lm;
+    static JButton cm;
+    static JButton rm;
+    static JButton lb;
+    static JButton cb;
+    static JButton rb;
+
+    static JLabel ltText;
+    static JLabel ctText;
+    static JLabel rtText;
+    static JLabel lmText;
+    static JLabel cmText;
+    static JLabel rmText;
+    static JLabel lbText;
+    static JLabel cbText;
+    static JLabel rbText;
+
     static Stack<Integer> p1moves = new Stack<>();
     static Stack<Integer> p2moves = new Stack<>();
 
@@ -203,25 +223,25 @@ public class Main {
         window.setSize(1000,800);
         window.setVisible(true);
 
-        JButton lt = new JButton();
-        JButton ct = new JButton();
-        JButton rt = new JButton();
-        JButton lm = new JButton();
-        JButton cm = new JButton();
-        JButton rm = new JButton();
-        JButton lb = new JButton();
-        JButton cb = new JButton();
-        JButton rb = new JButton();
+        lt = new JButton();
+        ct = new JButton();
+        rt = new JButton();
+        lm = new JButton();
+        cm = new JButton();
+        rm = new JButton();
+        lb = new JButton();
+        cb = new JButton();
+        rb = new JButton();
 
-        JLabel ltText = new JLabel();
-        JLabel ctText = new JLabel();
-        JLabel rtText = new JLabel();
-        JLabel lmText = new JLabel();
-        JLabel cmText = new JLabel();
-        JLabel rmText = new JLabel();
-        JLabel lbText = new JLabel();
-        JLabel cbText = new JLabel();
-        JLabel rbText = new JLabel();
+        ltText = new JLabel();
+        ctText = new JLabel();
+        rtText = new JLabel();
+        lmText = new JLabel();
+        cmText = new JLabel();
+        rmText = new JLabel();
+        lbText = new JLabel();
+        cbText = new JLabel();
+        rbText = new JLabel();
         JLabel title = new JLabel("TicTacToe");
 
 
@@ -262,6 +282,9 @@ public class Main {
                     lt.setEnabled(false);
                     GameLogic.playerTwoMove(1);
                     p2moves.add(1);
+                    if (p2) {
+                        p2moveBoard(1);
+                    }
                 }
             }
         });
@@ -295,6 +318,9 @@ public class Main {
                     ct.setEnabled(false);
                     GameLogic.playerTwoMove(2);
                     p2moves.add(2);
+                    if (p2) {
+                        p2moveBoard(2);
+                    }
                 }
             }
         });
@@ -325,6 +351,9 @@ public class Main {
                     rt.setEnabled(false);
                     GameLogic.playerTwoMove(3);
                     p2moves.add(3);
+                    if (p2) {
+                        p2moveBoard(3);
+                    }
                 }
             }
         });
@@ -355,6 +384,9 @@ public class Main {
                     lm.setEnabled(false);
                     GameLogic.playerTwoMove(4);
                     p2moves.add(4);
+                    if (p2) {
+                        p2moveBoard(4);
+                    }
                 }
             }
         });
@@ -385,6 +417,9 @@ public class Main {
                     cm.setEnabled(false);
                     GameLogic.playerTwoMove(5);
                     p2moves.add(5);
+                    if (p2) {
+                        p2moveBoard(5);
+                    }
                 }
             }
         });
@@ -415,6 +450,9 @@ public class Main {
                     rm.setEnabled(false);
                     GameLogic.playerTwoMove(6);
                     p2moves.add(6);
+                    if (p2) {
+                        p2moveBoard(6);
+                    }
                 }
             }
         });
@@ -445,6 +483,9 @@ public class Main {
                     lb.setEnabled(false);
                     GameLogic.playerTwoMove(7);
                     p2moves.add(7);
+                    if (p2) {
+                        p2moveBoard(7);
+                    }
                 }
             }
         });
@@ -475,6 +516,9 @@ public class Main {
                     cb.setEnabled(false);
                     GameLogic.playerTwoMove(8);
                     p2moves.add(8);
+                    if (p2) {
+                        p2moveBoard(8);
+                    }
                 }
             }
         });
@@ -499,6 +543,7 @@ public class Main {
                     rb.setEnabled(false);
                     GameLogic.playerOneMove(9);
                     p1moves.add(9);
+                    gate=false;
                 } else if(player2) {
                     rbText.setText("O");
                     player2=false;
@@ -506,6 +551,10 @@ public class Main {
                     rb.setEnabled(false);
                     GameLogic.playerTwoMove(9);
                     p2moves.add(9);
+                    gate=false;
+                    if (p2) {
+                        p2moveBoard(9);
+                    }
                 }
             }
         });
@@ -537,7 +586,6 @@ public class Main {
                     } else {
                         hosting = true;
                         localGame = false;
-                        gate = false;
                         hostWindow.setVisible(false);
                         welcome.setVisible(false);
 
@@ -572,7 +620,6 @@ public class Main {
                     } else {
                         hosting = false;
                         p2 = true;
-                        gate = false;
                         joinWindow.setVisible(false);
                         welcome.setVisible(false);
                         runGame(address, joinPort);
@@ -618,6 +665,7 @@ public class Main {
                         JOptionPane.showMessageDialog(null, "Player2 wins", "Notice", JOptionPane.INFORMATION_MESSAGE);
                     }
                     playerTurn.setText("Player1's turn");
+                    while(gate){};
                     JSONObject send = new JSONObject();
                     send.put("p1move", p1moves.peek());
                     try {
@@ -643,6 +691,7 @@ public class Main {
                     } catch (Exception e) {
                         //TODO
                     }
+
                     GameLogic.playerTwoMove(p2moves.peek());
                 }
 
@@ -651,6 +700,8 @@ public class Main {
         }
 
         if (!hosting && p2) {
+            player1=false;
+            player2=true;
             DataOutputStream dos = null;
             DataInputStream dis = null;
             try {
@@ -669,6 +720,7 @@ public class Main {
                         JOptionPane.showMessageDialog(null, "Player1 wins", "Notice", JOptionPane.INFORMATION_MESSAGE);
                     }
                     playerTurn.setText("Player2's turn");
+                    while(gate){}
                     JSONObject send = new JSONObject();
                     send.put("p1move", p1moves.peek());
                     try {
@@ -676,6 +728,8 @@ public class Main {
                     } catch (IOException e) {
                         //TODO
                     }
+                    player1=false;
+                    player2=true;
                 } else if (player1) {
                     playerTurn.setText("Player1's turn");
                     if (GameLogic.checkVictoryP2()) {
@@ -719,6 +773,40 @@ public class Main {
 
             }
         }
+
+    }
+
+    private static void p2moveBoard(int n) {
+        switch (n) {
+            case 1:
+                lt.doClick();
+                break;
+            case 2:
+                ct.doClick();
+                break;
+            case 3:
+                rt.doClick();
+                break;
+            case 4:
+                lm.doClick();
+                break;
+            case 5:
+                cm.doClick();
+                break;
+            case 6:
+                rm.doClick();
+                break;
+            case 7:
+                lb.doClick();
+                break;
+            case 8:
+                cb.doClick();
+                break;
+            case 9:
+                rb.doClick();
+                break;
+        }
+
 
     }
 }
