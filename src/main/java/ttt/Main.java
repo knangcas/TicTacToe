@@ -11,6 +11,11 @@ public class Main {
 
     static boolean player1 = true;
     static boolean player2 = false;
+
+    boolean host;
+    boolean local;
+
+
     public static void main(String[] args) {
 
 
@@ -21,6 +26,12 @@ public class Main {
         JButton local = new JButton("Play offline");
         JLabel welcomeText = new JLabel("Welcome to TicTacToe!");
         welcome.setLayout(new GridBagLayout());
+
+
+        JDialog hostWindow = new JDialog();
+        JTextField hostPort = new JTextField();
+        JLabel hostPostLabel = new JLabel();
+
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridy=0;
