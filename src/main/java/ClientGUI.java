@@ -15,57 +15,55 @@ import java.util.Stack;
 
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
-public class Main {
+public class ClientGUI extends Thread {
 
-    static boolean player1 = true;
-    static boolean player2 = false;
+    boolean player1 = true;
+    boolean player2 = false;
 
-    static boolean hosting;
-    static boolean localGame;
+    boolean hosting;
+    boolean localGame;
 
-    static boolean p2;
+    boolean p2;
 
-    static int hostPort;
-    static int joinPort;
+    int hostPort;
+    int joinPort;
 
-    static boolean gate;
+    boolean gate;
 
-    static String address;
+    String address;
 
-    static Socket sock;
-    static ServerSocket servSock;
+    Socket sock;
+    ServerSocket servSock;
 
-    static JFrame window;
+    JFrame window;
 
-    static JLabel playerTurn;
+    JLabel playerTurn;
 
-    static JButton lt;
-    static JButton ct;
-    static JButton rt;
-    static JButton lm;
-    static JButton cm;
-    static JButton rm;
-    static JButton lb;
-    static JButton cb;
-    static JButton rb;
+    JButton lt;
+    JButton ct;
+    JButton rt;
+    JButton lm;
+    JButton cm;
+    JButton rm;
+    JButton lb;
+    JButton cb;
+    JButton rb;
 
-    static JLabel ltText;
-    static JLabel ctText;
-    static JLabel rtText;
-    static JLabel lmText;
-    static JLabel cmText;
-    static JLabel rmText;
-    static JLabel lbText;
-    static JLabel cbText;
-    static JLabel rbText;
+    JLabel ltText;
+    JLabel ctText;
+    JLabel rtText;
+    JLabel lmText;
+    JLabel cmText;
+    JLabel rmText;
+    JLabel lbText;
+    JLabel cbText;
+    JLabel rbText;
 
-    static Stack<Integer> p1moves = new Stack<>();
-    static Stack<Integer> p2moves = new Stack<>();
+    Stack<Integer> p1moves = new Stack<>();
+    Stack<Integer> p2moves = new Stack<>();
 
+    public ClientGUI() {
 
-
-
-    public static void main(String[] args) {
         gate = true;
         GridBagConstraints gbc = new GridBagConstraints();
         JDialog welcome = new JDialog();
@@ -221,7 +219,7 @@ public class Main {
 
 
         window.setSize(1000,800);
-        window.setVisible(true);
+        //window.setVisible(true);
 
         lt = new JButton();
         ct = new JButton();
@@ -634,11 +632,33 @@ public class Main {
             }
         });
 
+        local.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hosting = false;
+                localGame = true;
+                runGame("",0);
+                welcome.dispose();
+
+            }
+        });
+
+
 
 
     }
 
-    private static void runGame(String host, int port){
+
+    public static void main(String[] args) {
+
+        ClientGUI main = new ClientGUI();
+
+
+       // main.setVisible(true);
+
+    }
+
+    public void run(){
 
         window.setVisible(true);
         if (hosting) {
@@ -753,7 +773,7 @@ public class Main {
             }
         }
 
-        if (!hosting && !localGame) {
+        if (!hosting && localGame) {
             System.out.println("Playing local game");
             while(true) {
                 if (player1) {
@@ -776,7 +796,7 @@ public class Main {
 
     }
 
-    private static void p2moveBoard(int n) {
+    private void p2moveBoard(int n) {
         switch (n) {
             case 1:
                 lt.doClick();

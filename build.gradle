@@ -29,7 +29,7 @@ task runMain(type: JavaExec) {
 
     classpath = sourceSets.main.runtimeClasspath
 
-    mainClass = 'Main'
+    mainClass = 'ClientGUI'
     standardInput = System.in
 }
 
